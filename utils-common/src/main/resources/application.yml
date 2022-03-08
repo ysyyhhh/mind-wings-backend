@@ -1,0 +1,27 @@
+server:
+  port: 8090
+spring:
+  application:
+    name: utils-common
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql:///mind_wings?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=true
+    username: remote
+    password: wds20010821
+  jpa:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: update
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+
+audience: # 代表这个JWT的接收对象,存入audience
+  clientId: 098f6bcd4621d373cade4e832627b4f6 # 密钥, 经过Base64加密, 可自行替换
+  base64Secret: AIk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjY= # JWT的签发主体，存入issuer
+  name: workhours
+  expiresSecond: 72000000 # 过期时间，时间戳 120分钟

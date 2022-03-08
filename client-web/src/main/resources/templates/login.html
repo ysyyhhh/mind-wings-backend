@@ -1,0 +1,417 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>私有云网盘</title>
+	<meta name="viewport" content="width=device-width,user-scalable=no"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+	<meta name="keywords" content="私有云网盘"/>
+	<meta name="description" content="世界上最好的私有云网盘"/>
+	<meta name="author" content="小柒2012" />
+	<meta name="site" content="https://blog.52itstyle.vip" />
+	<link rel="stylesheet" th:href="@{/iview/styles/iview.css}">
+	<link rel="icon" type="image/png" th:href="@{assets/i/favicon.png}">
+	<link rel="apple-touch-icon-precomposed" href="@{assets/i/app-icon72x72@2x.png}">
+	<link rel="stylesheet" th:href="@{assets/css/amazeui.min.css}" />
+	<link rel="stylesheet" th:href="@{assets/css/admin.css}">
+	<link rel="stylesheet" th:href="@{assets/css/app.css}">
+
+
+
+</head>
+<body data-type="login">
+<div class="am-g myapp-login" v-cloak id="app">
+	<div class="myapp-login-logo-block  tpl-login-max">
+		<div class="myapp-login-logo-text">
+			<div class="myapp-login-logo-text">
+
+				心灵之翼<span v-if="logInOrSignUp"> Login</span> <span v-if="!logInOrSignUp"> Sign Up</span> <i class="am-icon-skyatlas"></i>
+			</div>
+		</div>
+		<div v-if="logInOrSignUp"class="login-font">
+			<i>Log In </i> or <span @click="logInOrSignUp=!logInOrSignUp"> Sign Up</span>
+		</div>
+		<div v-else class="login-font">
+			<span @click="logInOrSignUp=!logInOrSignUp"> Log Up</span> or <i>Sign Up </i>
+		</div>
+		<div class="am-u-sm-10 login-am-center">
+			<form v-if="logInOrSignUp" class="am-form">
+				<fieldset>
+					<div class="am-form-group">
+						<input type="text"  v-model="loginName" placeholder="输入手机号/用户名/邮箱">
+					</div>
+					<div class="am-form-group">
+						<input type="password"   v-model="loginPassword"    placeholder="输入登录密码">
+					</div>
+					<p><button type="button"  @click="login" class="am-btn am-btn-default">登录</button></p>
+					<div align="center">
+						<img  src="https://blog.52itstyle.vip/usr/uploads/2017/07/1801066129.jpg"/>
+					</div>
+				</fieldset>
+			</form>
+			<form v-else class="am-form">
+				<fieldset>
+<!--					private String username;-->
+<!--					private String userPhone;-->
+<!--					private String password;-->
+<!--					private String nickname;-->
+<!--					private String email;-->
+					<div class="am-form-group">
+						<input type="text"  v-model="username"    placeholder="输入用户名">
+					</div>
+					<div class="am-form-group">
+						<input type="text"  v-model="nickname"    placeholder="输入昵称">
+					</div>
+					<div class="am-form-group">
+						<input type="text"  v-model="userPhone"    placeholder="输入手机号">
+					</div>
+					<div class="am-form-group">
+						<input type="password"   v-model="password1"   placeholder="设置个密码吧">
+					</div>
+					<div class="am-form-group">
+						<input type="password"   v-model="password2"  placeholder="再次输入密码吧">
+					</div>
+					<div class="am-form-group">
+						<input type="email"  v-model="email"    placeholder="输入邮箱">
+					</div>
+					<p><button type="button"  @click="signup" class="am-btn am-btn-default">注册</button></p>
+					<div align="center">
+						<img  src="https://blog.52itstyle.vip/usr/uploads/2017/07/1801066129.jpg"/>
+					</div>
+				</fieldset>
+			</form>
+
+		</div>
+	</div>
+</div>
+<script th:src="@{assets/js/jquery.min.js}"></script>
+<script th:src="@{assets/js/amazeui.min.js}"></script>
+<script th:src="@{assets/js/app.js}"></script>
+<script th:src="@{libs/vue.min.js}"></script>
+<script th:src="@{libs/vue.min.js}"></script>
+<script th:src="@{/iview/iview.min.js}" type="text/javascript"></script>
+<script th:src="@{/utils/jsencrypt.js}" type="text/javascript"></script>
+<script src="https://unpkg.com/axios@0.20.0/dist/axios.min.js"></script>
+<script>
+	// import {rsa} from "../static/utils/rsa";
+	const user_url = "http://localhost:8700/service-user/login"
+
+
+	var encrypt = new JSEncrypt();
+	/**
+	 * 获取字符串的哈希值
+	 * @param {String} str
+	 * @return {string} hashCode
+	 */
+	function getHashCode (str){
+
+		// 1315423911=b'1001110011001111100011010100111'
+		var hash  = 1315423911,i,ch;
+		for (i = str.length - 1; i >= 0; i--) {
+			ch = str.charCodeAt(i);
+			hash ^= ((hash << 5) + ch + (hash >> 2));
+		}
+		return  (hash & 0x7FFFFFFF).toString();
+	}
+	$(function () {
+		var vm = new Vue({
+			el: '#app',
+			data:{
+				username: '',
+				password1: '',
+				password2: '',
+				userPhone:'',
+				nickname:'',
+				email:'',
+
+				pubKey:'',
+				loginName:'',
+				loginPassword:'',
+				logInOrSignUp:true
+			},
+			methods: {
+				async getPubKey(loginName){
+					return new Promise((resolve, reject) => {
+
+						console.log("准备发送获取公钥 " + loginName)
+						//先发送手机号，获取公钥
+						let url = user_url + "/getPubKey";
+						var data = {
+							"loginName" : loginName
+						}
+						axios.post(url, data).then((e) => {
+							let res = e.data
+							console.log(res)
+							if(res.code!=1){
+								console.log("获取公钥失败！");
+								_this.$Message.error("系统错误！")
+								reject(res)
+							}
+							resolve(res.data)
+						}).catch(function (error){
+							reject(error)
+						});
+					})
+
+				},
+				async signup (){
+					console.log("开始注册")
+					console.log(this)
+					var _this = this
+					if(this.password1 != this.password2) {
+						this.$Message.error("两次密码不一致");
+						return
+					}
+					var password = this.password1
+					var loginName = this.userPhone
+
+					var pubKey = await this.getPubKey(loginName)
+
+					if(typeof(pubKey)!='string') {
+						console.log("获取公钥失败！")
+						return
+					}
+
+
+					console.log("公钥:")
+					console.log(pubKey)
+					//设置公钥
+					encrypt.setPublicKey(pubKey)
+
+					console.log("初始密码:")
+					console.log(password)
+
+					var hashPassword = getHashCode(password)
+					console.log("前端hash加密的密码为 "+hashPassword)
+
+					var encodeData = encrypt.encrypt(hashPassword)
+					console.log("加密后的: "+encodeData)
+
+					//使用公钥加密密码
+					console.log("使用公钥加密的密码为 " + encodeData)
+					data = {
+						"username":_this.username,
+						"userPhone":_this.userPhone,
+						"password":encodeData,
+						"nickname":_this.nickname,
+						"email":_this.email
+					}
+
+					console.log("准备发送注册数据 ")
+					console.log(data)
+					let url = user_url + "/signup"
+					axios.post(url, data).then((e) => {
+						let res = e.data
+						console.log("注册返回结果为")
+						console.log(res)
+						if(res.code!=1){
+							console.log("注册失败！")
+							this.$Message.error("注册失败");
+							return
+						}
+						if(res.data){
+							this.$Message.success("注册成功");
+							this.logInOrSignUp = !this.logInOrSignUp;
+						}
+					})
+					.catch(function (error) { // 请求失败处理
+						console.log(error)
+						_this.$Message.error("已经存在该用户！")
+					});
+				},
+				async login (){
+					if(this.loginName==""){
+						this.$Message.warning("请输入手机号");
+						return false;
+					}else if(this.loginPassword==""){
+						this.$Message.warning("请输入密码");
+						return false;
+					}
+					var _this = this
+					var loginName = this.loginName;
+					var password = this.loginPassword;
+					console.log("登录开始 ")
+
+
+
+					console.log("公钥:")
+					let pubKey = await this.getPubKey(loginName)
+					if(typeof(pubKey)!='string') {
+						console.log("获取公钥失败！")
+						return
+					}
+					console.log(pubKey)
+					var encrypt = new JSEncrypt();
+					//设置公钥
+					encrypt.setPublicKey(pubKey)
+
+					console.log("初始密码:")
+					console.log(password)
+
+					var hashPassword = getHashCode(password)
+					console.log("前端hash加密的密码为 "+hashPassword)
+
+					var encodeData = encrypt.encrypt(hashPassword)
+					console.log("加密后的: "+encodeData)
+
+					let url = user_url + "/login"//访问路径
+					let data = {"loginName":loginName,"password":encodeURI(encodeData).replace(/\+/g, '%2B')}
+					axios.post(url, data).then((e) => {
+						console.log(e)
+						let res = e.data
+						if(res.code != 1){
+							console.log("登录失败!")
+							_this.$Message.error("登录失败!");
+							return
+						}
+						_this.$Message.success("登录成功!");
+						//跳转
+
+					}).catch(function (error){
+						console.log(error)
+					});
+
+					// 	$.ajax({
+					// 		type: "post",  //提交方式
+					// 		url: user_url + "/login",//访问路径
+					// 		contentType: 'application/json;charset=utf-8',//返回json结果
+					// 		data: JSON.stringify({"loginName":loginName,"password":encodeURI(encodeData).replace(/\+/g, '%2B')}),
+					// 		success: function (data) {
+					// 			console.log(data)
+					//
+					// 		}
+					// 	});
+					// }).catch(function (error) { // 请求失败处理
+					// 		// _this.$message.error(String(error))
+					// 		console.log(error)
+					// });
+					// $.ajax({
+					// 	type: "post",  //提交方式
+					// 	url: user_url + "/signupGetPubKey",//访问路径
+					// 	contentType: 'application/json;charset=utf-8',//返回json结果
+					// 	data: JSON.stringify({"loginName":loginName}),
+					// 	success: function (data) {
+					// 		//实例化一个JSEncrypt对象
+					// 		var encrypt = new JSEncrypt();
+					// 		console.log(data)
+					// 		console.log("公钥:")
+					// 		console.log(data)
+					// 		//设置公钥
+					// 		encrypt.setPublicKey(data)
+					//
+					// 		console.log("初始密码:")
+					// 		console.log(password)
+					//
+					// 		var hashPassword = getHashCode(password)
+					// 		console.log("前端hash加密的密码为 "+hashPassword)
+					//
+					// 		var encodeData = encrypt.encrypt(hashPassword)
+					// 		console.log("加密后的: "+encodeData)
+					//
+					// 		$.ajax({
+					// 			type: "post",  //提交方式
+					// 			url: user_url + "/login",//访问路径
+					// 			contentType: 'application/json;charset=utf-8',//返回json结果
+					// 			data: JSON.stringify({"loginName":loginName,"password":encodeURI(encodeData).replace(/\+/g, '%2B')}),
+					// 			success: function (data) {
+					// 				console.log(data)
+					//
+					// 			}
+					// 		});
+					// 	}
+
+				},
+				login1: function (event) {
+					if(this.loginName==""){
+						this.$Message.warning("请输入手机号");
+						return false;
+					}else if(this.loginPassword==""){
+						this.$Message.warning("请输入密码");
+						return false;
+					}
+
+					console.log("登录开始 ")
+					let _this = this
+					let data = {
+						"userPhone":this.loginName
+					}
+					let url = user_url+"/signupGetPubKey"
+					var loginName = this.loginName
+					console.log("准备发送获取公钥")
+					//先发送手机号，获取公钥
+					axios.post(url, data)
+							.then((res) => {
+								console.log("获取到返回数据")
+								console.log(res)
+
+								let password = getHashCode(_this.password1)
+								console.log("前端hash加密的密码为 "+password)
+
+								console.log("公钥为 " + res.data)
+								var encrypt = new JSEncrypt();
+								encrypt.setPublicKey(res.data)
+								var encodeData = encrypt.encrypt(password)
+
+								//使用公钥加密密码
+								console.log("使用公钥加密后的密码为 " + encodeData)
+								console.log("发送的loginName :" + loginName)
+								url = user_url + "/login"
+								$.ajax({
+									type: "post",  //提交方式
+									url: url,//访问路径
+									contentType: 'application/json;charset=utf-8',//返回json结果
+									data: JSON.stringify({"loginName":loginName,"password":encodeURI(encodeData).replace(/\+/g, '%2B')}),
+									success: function (data) {
+										console.log(data)
+									}
+								});
+
+								// axios.post(url, data)
+								// 		.then((res) => {
+								// 			console.log("登录的返回结果为")
+								//
+								// 			console.log(res)
+								// 			// parent.location.href ='index.shtml';
+								// 			this.$Message.success("登录成功");
+								// 		})
+								// 		.catch(function (error) { // 请求失败处理
+								// 			this.$Message.error("登录失败");
+								// 			console.log(error)
+								// 		});
+
+							}).catch(function (error) { // 请求失败处理
+							// _this.$message.error(String(error))
+							console.log(error)
+					});
+
+
+
+
+
+
+					// $.ajax({
+					// 	type: "POST",
+					// 	url: "user/login",
+					// 	data: data,
+					// 	dataType: "json",
+					// 	success: function(result){
+					// 		if(result.code == 0){//登录成功
+					// 			parent.location.href ='index.shtml';
+					// 		}else{
+					// 			self.$Notice.warning({
+					// 				title: '友情提醒',
+					// 				desc: '为了防止恶意上传，请扫描二维码关注公众号回复私有网盘获取账号密码'
+					// 			});
+					// 		}
+					// 	}
+					// });
+				},
+			},
+			created: function(){
+
+			}
+		});
+	});
+</script>
+</body>
+</html>

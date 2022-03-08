@@ -1,0 +1,65 @@
+# 应用名称
+server:
+  port: 8700
+spring:
+  application:
+    name: api-gateway
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql:///mind_wings?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=true
+    username: remote
+    password: wds20010821
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedHeaders: "*"
+            allowedOrigins: "*"
+            allowCredentials: true
+            allowedMethods:
+              - GET
+              - POST
+              - DELETE
+              - PUT
+              - OPTION
+      discovery:
+        locator:
+          enabled: true # 让gateway可以发现nacos中的微服务
+      routes:
+        - id: service_user_route
+          uri: lb://service-user # lb指的是从nacos中按照名称获取微服务,并遵循负载均衡策略
+          order: 1
+          predicates:
+            - Path=/service-user/**
+          filters:
+            - StripPrefix=1
+#            - Log=true,false #控制日志是否开启
+#            - SetStatus=250
+#    gateway:
+#      routes: #路由数组 当请求满足什么条件时，转发到什么微服务上
+#        - id: product_route #当前路由发的标识，要求唯一,默认是UID
+#          uri: http://localhost:8081 #请求最终要被转发的微服务地址
+#          order: 1 #路由的优先级，数字越小，优先级越高
+#          predicates: #断言数组，（（多）条件判断，返回值是boolean，是转发的条件）
+#            - Path=/product-serv/** #当请求路径满足，Path指定的规则时，路由信息正常转发
+#          filters: #过滤器（请求传递过程中 对请求做的一些手脚,比如删一些东西）
+#            - StripPrefix=1 #在请求转发之前去掉一层路径
+org:
+  my:
+    jwt:
+      #跳过认证的路由
+      skip-auth-urls:
+        - /service-user/login/getPubKey
+        - /service-user/login/login
+        - /service-user/login/signup
+      ############################################
+      #   有效时长
+      #     单位：d:天、h:小时、m:分钟、s:秒
+      ###########################################
+      effective-time: 1m
+
+

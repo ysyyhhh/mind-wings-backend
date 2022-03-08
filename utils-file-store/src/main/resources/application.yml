@@ -1,0 +1,21 @@
+server:
+  port: 8088
+spring:
+  application:
+    name: utils-file-store
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql:///mind_wings?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=true
+#    url: jdbc:mysql://42.192.226.66:3306/shop?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=true
+    username: remote
+    password: wds20010821
+  jpa:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: update
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
