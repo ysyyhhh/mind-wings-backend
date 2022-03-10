@@ -3,9 +3,11 @@ package cc.yysy.serviceuser.service;
 import cc.yysy.serviceuser.bean.*;
 import cc.yysy.utilscommon.entity.SysUser;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public interface UserService {
 
     /**
@@ -28,7 +30,7 @@ public interface UserService {
      * @param password
      * @return
      */
-    public boolean login(String loginName, String password);
+    public String login(String loginName, String password);
 
 
 
@@ -38,10 +40,4 @@ public interface UserService {
      */
     public void logout(String token);
 
-    /**
-     * 根据token获取用户信息
-     * @param token
-     * @return
-     */
-    public SessionUserBean getUserByToken(String token);
 }

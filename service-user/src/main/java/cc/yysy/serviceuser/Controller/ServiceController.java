@@ -9,15 +9,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
+
 @RestController
 @RequestMapping("/api")
 @Component
 public class ServiceController {
 
-    @Autowired
+    @Resource
     UserServiceImpl userService;
+
+
     @RequestMapping("/getUser/{userPhone}")
-    public SysUser getUser(@PathVariable String userPhone){
+    public SysUser getUser(@PathVariable("userPhone") String userPhone){
+        System.out.println("getUser " + userPhone);
         return userService.getUser(userPhone);
     }
 
@@ -25,4 +30,10 @@ public class ServiceController {
     public String test(){
         return "success!";
     }
+
+    @RequestMapping("/adminTest")
+    public String adminTest(){
+        return "success!";
+    }
+
 }

@@ -10,6 +10,7 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.netty.util.internal.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.AntPathMatcher;
@@ -21,7 +22,6 @@ import java.util.logging.Logger;
 public class AuthService {
     static Logger logger = Logger.getLogger("AuthService log");
 
-    private JWTUtils jwtUtils;
 
     private AntPathMatcher antPathMatcher = new AntPathMatcher();
 
@@ -34,6 +34,7 @@ public class AuthService {
      */
     public SysUser verify(String token){
 
+        logger.info(token);
         // 获取 token 中的 userPhone
         String userPhone;
         try {
@@ -55,8 +56,9 @@ public class AuthService {
             throw new RuntimeException("用户不存在，请重新登录");
         }
 
+        logger.info(user.toString());
         //校验token与user对象是否正确
-        if(jwtUtils.verify(token,user)){
+        if(JWTUtils.verify(token,user)){
             return user;
         }
 
@@ -76,14 +78,17 @@ public class AuthService {
     }
 
     private boolean verifyPathAuth(String reqPath, SysUser user) {
-
+        logger.info(reqPath);
         String urlPermission = getUrlPermission(reqPath);
+        logger.info(urlPermission);
         // 如果url仅要求验证用户有效性，则直接通过
-        if (Strings.isNullOrEmpty(urlPermission) ||
-                "authc".equals(urlPermission)) {
+        logger.info(String.valueOf(StringUtil.isNullOrEmpty(urlPermission)));
+        logger.info(String.valueOf(urlPermission.compareTo("authc")));
+        if (!StringUtil.isNullOrEmpty(urlPermission) && (urlPermission.compareTo("authc") == 0) ){
             return true;
         }
 
+        logger.info("进一步判断用户权限");
         // 进一步判断用户权限
         if (urlPermission.startsWith("perms")) {
             Set<String> userPerms = this.getUserPermissions(user);
@@ -99,7 +104,8 @@ public class AuthService {
      */
     public Map<String, String> getAllUrlPermissionsMap() {
         Map<String, String> urlPermissionsMap = Maps.newHashMap();
-        urlPermissionsMap.put("/user-service/**", "authc");
+        urlPermissionsMap.put("/service-user/api/test", "authc");
+        urlPermissionsMap.put("/service-user/api/adminTest", "perms[admin]");
 //        urlPermissionsMap.put("/user-service/signup", "authc");
 //        urlPermissionsMap.put("/order-service/", "perms[order]");
 //        urlPermissionsMap.put("/storage-service/api/storage/**", "perms[storage]");
@@ -130,6 +136,7 @@ public class AuthService {
             return null;
         }
         Map<String, String> urlPermissionsMap = getAllUrlPermissionsMap();
+        logger.info(urlPermissionsMap.toString());
         Set<String> urlPatterns = urlPermissionsMap.keySet();
         for (String pattern : urlPatterns) {
             boolean match = false;

@@ -7,7 +7,10 @@ import cc.yysy.utilscommon.entity.SysUser;
 import cc.yysy.utilscommon.exception.BizException;
 import cc.yysy.utilscommon.utils.HASHUtils;
 import cc.yysy.utilscommon.utils.IOUtils;
+import cc.yysy.utilscommon.utils.JWTUtils;
 import cc.yysy.utilscommon.utils.RsaUtils;
+import com.auth0.jwt.JWT;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +29,7 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     UserMapper userMapper;
+
 
     public static UserServiceImpl userService;
 
@@ -136,8 +140,10 @@ public class UserServiceImpl implements UserService {
     private String getUserPhone(String loginName){
         return userMapper.selectPhone(loginName);
     }
+
+
     @Override
-    public boolean login(String loginName, String password) {
+    public String login(String loginName, String password) {
         String priKey = null;
         //获取用户的手机号
         String userPhone = getUserPhone(loginName);
@@ -160,22 +166,27 @@ public class UserServiceImpl implements UserService {
             //从数据库取出密码
             String userPassword = userMapper.selectPassword(userPhone);
 
-            System.out.println("数据库取出的密码为：" + newPassword);
+            System.out.println("数据库取出的密码为：" + userPassword);
 //            //匹配
             boolean match = HASHUtils.saltMatches(newPassword,userPassword);
             if(!match) {
                 System.out.println("不匹配，登录失败！");
-                return false;
+                return null;
             }
 //
-//            //登录成功
-            System.out.println("登录成功！！！");
+//           //登录成功
+//           System.out.println("登录成功！！！");
 
-            return true;
+            //取出用户
+            SysUser user = getUser(userPhone);
+
+            String token = JWTUtils.getToken(user);
+
+            return token;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return null;
     }
 
     @Override
@@ -183,8 +194,4 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Override
-    public SessionUserBean getUserByToken(String token) {
-        return null;
-    }
 }

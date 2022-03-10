@@ -1,5 +1,6 @@
 package cc.yysy.utilscommon.utils;
 
+import cc.yysy.utilscommon.entity.SysUser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +14,12 @@ import java.security.PublicKey;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class TestUtils {
+
+    @Test
+    public void testJWT(){
+        SysUser sysUser = new SysUser();
+        JWTUtils.getToken(sysUser);
+    }
     /**
      * 客户端加密, 返回加密后的数据
      */

@@ -15,6 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface UserService {
     //指定请求的URL部分
     @RequestMapping("/api/getUser/{userPhone}")
-    public SysUser getUser(@PathVariable String userPhone);
+    public SysUser getUser(@PathVariable("userPhone") String userPhone);
 }
 

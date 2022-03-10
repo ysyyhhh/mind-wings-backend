@@ -16,6 +16,7 @@ public class UserServiceFallback implements UserService {
     @Override
     public SysUser getUser(String userPhone) {
         SysUser user = new SysUser();
+        System.out.println("调用失败！！！");
         return null;
     }
 }

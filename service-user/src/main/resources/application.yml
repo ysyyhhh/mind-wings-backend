@@ -18,3 +18,6 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true

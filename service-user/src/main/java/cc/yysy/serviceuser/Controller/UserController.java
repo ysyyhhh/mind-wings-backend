@@ -6,6 +6,7 @@ import cc.yysy.serviceuser.service.impl.UserServiceImpl;
 import cc.yysy.utilscommon.result.Result;
 import cc.yysy.utilscommon.result.ResultCode;
 import cc.yysy.utilscommon.entity.SysUser;
+import com.mysql.cj.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +54,7 @@ public class UserController {
         return Result.error(-1,"注册失败!");
     }
 
+
     /**
      * 登录
      * @return
@@ -65,8 +67,9 @@ public class UserController {
         password = URLDecoder.decode(password,"UTF-8");
         System.out.println("utf-8 : " + password);
 
-        if(userService.login(loginName, password)){
-            return Result.success("登录成功!");
+        String token = userService.login(loginName, password);
+        if(!StringUtils.isNullOrEmpty(token)){
+            return Result.success(token);
         }
         return  Result.error(ResultCode.USER_LOGIN_ERROR);
     }

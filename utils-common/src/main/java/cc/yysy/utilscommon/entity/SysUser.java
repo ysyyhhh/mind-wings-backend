@@ -93,4 +93,18 @@ public class SysUser {
     private Timestamp gmtCreate; //用户创建时间
     private Timestamp gmtUpdate; //用户活动时间
     private Integer userType; //用户权限
+
+    @Override
+    public String toString() {
+        return "SysUser{" +
+                "userPhone='" + userPhone + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", email='" + email + '\'' +
+                ", gmtCreate=" + gmtCreate +
+                ", gmtUpdate=" + gmtUpdate +
+                ", userType=" + userType +
+                '}';
+    }
 }

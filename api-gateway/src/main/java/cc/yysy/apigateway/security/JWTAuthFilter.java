@@ -48,6 +48,7 @@ public class JWTAuthFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
+
         String token = exchange.getRequest().getHeaders().getFirst("token");
         if(StringUtil.isNullOrEmpty(token)){
             throw new RuntimeException("无token");
