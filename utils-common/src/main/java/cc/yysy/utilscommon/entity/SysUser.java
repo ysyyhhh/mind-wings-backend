@@ -4,7 +4,11 @@ package cc.yysy.utilscommon.entity;
 
 
 
+
+
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 
@@ -15,7 +19,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Table(name="sys_user")
-public class SysUser {
+public class SysUser implements Serializable {
     public String getUserPhone() {
         return userPhone;
     }
@@ -81,30 +85,16 @@ public class SysUser {
     }
 
     @Id
-    private String userPhone;
+    String userPhone;
 
     @Column(unique=true)
-    private String username;
-    private String password;
-    private String nickname;
+    String username;
+    String password;
+    String nickname;
 
     @Column(unique=true)
-    private String email;
-    private Timestamp gmtCreate; //用户创建时间
-    private Timestamp gmtUpdate; //用户活动时间
-    private Integer userType; //用户权限
-
-    @Override
-    public String toString() {
-        return "SysUser{" +
-                "userPhone='" + userPhone + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", nickname='" + nickname + '\'' +
-                ", email='" + email + '\'' +
-                ", gmtCreate=" + gmtCreate +
-                ", gmtUpdate=" + gmtUpdate +
-                ", userType=" + userType +
-                '}';
-    }
+    String email;
+    Timestamp gmtCreate; //用户创建时间
+    Timestamp gmtUpdate; //用户活动时间
+    Integer userType; //用户权限
 }

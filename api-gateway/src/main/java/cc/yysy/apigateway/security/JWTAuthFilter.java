@@ -1,7 +1,10 @@
 package cc.yysy.apigateway.security;
 
 
+import cc.yysy.utilscommon.constant.SystemConstant;
+import cc.yysy.utilscommon.entity.SysUser;
 import cc.yysy.utilscommon.utils.JWTUtils;
+import com.alibaba.fastjson.JSONObject;
 import io.netty.util.internal.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -29,10 +32,7 @@ public class JWTAuthFilter implements GlobalFilter, Ordered {
     AuthService authService;
 
 
-    /**
-     * 解析后的用户唯一标识在header中的name
-     */
-    private static final String headerKeyOfUserPhone = "X-user-phone";
+
 
 
     @Override
@@ -54,17 +54,16 @@ public class JWTAuthFilter implements GlobalFilter, Ordered {
             throw new RuntimeException("无token");
         }
         logger.info("token = " + token);
-        String userPhone = authService.verifyToken(reqPath, token);
-        if (StringUtil.isNullOrEmpty(userPhone)) {
+        SysUser user = authService.verifyToken(reqPath, token);
+        if (user == null) {
             logger.warning("没有授权的访问" + reqPath);
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
         //获取token中存储的用户唯一标识userPhone，并放入request header中，供后端业务服务使用
-
         ServerHttpRequest request = exchange.getRequest().mutate()
-                .header(headerKeyOfUserPhone, userPhone).build();
+                .header(SystemConstant.HEADER_KEY_OF_USER, JSONObject.toJSONString(user) ).build();
 
         return chain.filter(exchange.mutate().request(request).build());
     }

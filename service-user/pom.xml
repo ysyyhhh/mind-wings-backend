@@ -9,6 +9,19 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>service-user</artifactId>
+
+
+    <packaging>jar</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+
     <dependencies>
         <!--nacos客户端-->
         <dependency>

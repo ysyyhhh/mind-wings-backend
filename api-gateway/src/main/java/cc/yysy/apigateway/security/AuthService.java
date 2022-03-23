@@ -65,13 +65,13 @@ public class AuthService {
         return null;
     }
 
-    public String verifyToken(String reqPath, String token) {
+    public SysUser verifyToken(String reqPath, String token) {
         //通过token获取用户
         SysUser user = verify(token);
 
         //判断权限
         if(verifyPathAuth(reqPath,user)){
-            return user.getUserPhone();
+            return user;
         }
 
         throw new BizException("无权限！");
@@ -83,7 +83,7 @@ public class AuthService {
         logger.info(urlPermission);
         // 如果url仅要求验证用户有效性，则直接通过
         logger.info(String.valueOf(StringUtil.isNullOrEmpty(urlPermission)));
-        logger.info(String.valueOf(urlPermission.compareTo("authc")));
+//        logger.info(String.valueOf(urlPermission.compareTo("authc")));
         if (!StringUtil.isNullOrEmpty(urlPermission) && (urlPermission.compareTo("authc") == 0) ){
             return true;
         }
@@ -104,8 +104,12 @@ public class AuthService {
      */
     public Map<String, String> getAllUrlPermissionsMap() {
         Map<String, String> urlPermissionsMap = Maps.newHashMap();
+        urlPermissionsMap.put("/service-user/api/getUser", "authc");
         urlPermissionsMap.put("/service-user/api/test", "authc");
+        urlPermissionsMap.put("/service-timetable/timetable/**", "authc");
+        urlPermissionsMap.put("/service-timetable/classList/**", "authc");
         urlPermissionsMap.put("/service-user/api/adminTest", "perms[admin]");
+        urlPermissionsMap.put("/service-user/api/getCoupleToken", "perms[admin]");
 //        urlPermissionsMap.put("/user-service/signup", "authc");
 //        urlPermissionsMap.put("/order-service/", "perms[order]");
 //        urlPermissionsMap.put("/storage-service/api/storage/**", "perms[storage]");

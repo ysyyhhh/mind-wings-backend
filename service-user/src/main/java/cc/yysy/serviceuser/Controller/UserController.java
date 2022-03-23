@@ -3,9 +3,12 @@ package cc.yysy.serviceuser.Controller;
 
 
 import cc.yysy.serviceuser.service.impl.UserServiceImpl;
+import cc.yysy.utilscommon.constant.SystemConstant;
 import cc.yysy.utilscommon.result.Result;
 import cc.yysy.utilscommon.result.ResultCode;
 import cc.yysy.utilscommon.entity.SysUser;
+import cc.yysy.utilscommon.utils.ThreadLocalUtils;
+import com.alibaba.fastjson.JSONObject;
 import com.mysql.cj.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -73,6 +76,9 @@ public class UserController {
         }
         return  Result.error(ResultCode.USER_LOGIN_ERROR);
     }
+
+
+
 
 
 

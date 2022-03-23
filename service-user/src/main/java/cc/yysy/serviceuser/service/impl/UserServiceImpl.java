@@ -9,7 +9,10 @@ import cc.yysy.utilscommon.utils.HASHUtils;
 import cc.yysy.utilscommon.utils.IOUtils;
 import cc.yysy.utilscommon.utils.JWTUtils;
 import cc.yysy.utilscommon.utils.RsaUtils;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.JWT;
+import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,7 @@ import javax.annotation.Resource;
 import java.io.File;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @Service
@@ -123,6 +127,8 @@ public class UserServiceImpl implements UserService {
             logger.info("加盐hash后的密码是 "+finalPassword);
             //存入用户信息到数据库中
             logger.info("存入用户信息");
+
+            logger.info(JSON.toJSONString(sysUser));
             int res = userMapper.insertSysUser(sysUser);
             logger.info("存入结果 " + res);
             return res == 1;
@@ -149,7 +155,7 @@ public class UserServiceImpl implements UserService {
         String userPhone = getUserPhone(loginName);
         logger.info("获取到的手机号为 "+userPhone);
         if(userPhone == null){
-            throw new BizException("已经存在用户名 | 手机号 | 邮箱");
+            throw new BizException("不存在该用户名 | 手机号 | 邮箱");
         }
         try {
             logger.info("用户手机号为 "+userPhone);
@@ -194,4 +200,18 @@ public class UserServiceImpl implements UserService {
 
     }
 
+
+    public String getCoupleToken(SysUser user){
+        Map<String, String> coupleToken = Maps.newHashMap();
+        coupleToken.put("wds134", "hj157");
+        coupleToken.put("hj157", "wds134");
+        if(coupleToken.containsKey(user.getUserPhone())){
+            String couplePhone = coupleToken.get(user.getUserPhone());
+            SysUser coupleUser = getUser(couplePhone);
+            String token = JWTUtils.getToken(coupleUser);
+            return token;
+        }
+
+        return null;
+    }
 }

@@ -1,11 +1,19 @@
 package cc.yysy.utilscommon.constant;
 /**
  * 系统级静态变量
- * 创建者 张志朋
- * 创建时间	2017年11月20日
  */
 public class SystemConstant {
-	
+
+	/**
+	 * 解析后的用户唯一标识在header中的name
+	 */
+	public static final String HEADER_KEY_OF_USER_PHONE = "X-user-phone";
+
+	/**
+	 * 解析后的用户唯一标识在header中的name
+	 */
+	public static final String HEADER_KEY_OF_USER = "X-user";
+
 	/**
 	 * 超级管理员ID
 	 */
